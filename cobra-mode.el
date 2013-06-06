@@ -9,10 +9,11 @@
 (defvar cobra-font-lock-keywords
   `(
 
-    (,(regexp-opt '("as" "require" "ensure" "body" "test" "use" "catch" "ref" "shared" "cue" "var"
+    (,(regexp-opt '("vari" "as" "require" "ensure" "body" "test" "use" "catch" "ref" "shared" "cue"
                     "get" "set" "throw" "as" "using" "namespace" "of" "stop" "out" "branch" "on"
                     "pro" "inherits" "protected" "final" "override" "public" "constant" "invariant"
-                    "implies") 'words)
+                    "implies" "var" "success" "enum" "interface" "implements" "<>" "result" "old"
+                    ) 'words)
      1 font-lock-keyword-face)
 
     (,(regexp-opt '("String" "nil" "decimal" "number" "dynamic") 'words)
