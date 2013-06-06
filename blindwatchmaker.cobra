@@ -1,0 +1,118 @@
+class BlindWatchMaker1
+    var _random = Random()
+
+    def main
+        goal = 'methinks it is like a weasel'
+        alphabet = 'abcdefghijklmnopqrstuvwxyz '
+        duration1 = .runCumulativeSelection(goal, alphabet)
+        duration2 = .runSingleStepSelection(goal, alphabet)
+        factor = duration2 / duration1
+        print 'Single step selection took [Math.round(factor)] times longer than cumulative selection and *still* failed.'
+
+    def runCumulativeSelection(goal as String, alphabet as String) as float
+        require
+            goal.length  # Pex
+            alphabet.length  # Pex
+        ensure
+            result > 0
+        body
+            print 'Cumulative Selection:'
+            start = DateTime.now
+            # wip stands for "work in progress"
+            wip = .randomString(goal.length, alphabet)
+            showAttempt = true
+            generation = 1
+            while true
+                score = .score(wip, goal)  # 0..100
+                if showAttempt
+                    print '    attempt [generation.toString.padLeft(4)] [wip] ==> [score]%'
+                if score >= 100
+                    break
+                mutantChar = alphabet[_random.next(alphabet.length)]
+                mutantIndex = _random.next(wip.length)
+                firstPart = wip[:mutantIndex]
+                secondPart = wip[mutantIndex+1:]
+                offspring = '[firstPart][mutantChar][secondPart]'
+                if .score(offspring, goal) > .score(wip, goal)
+                    # we have a new, improved string
+                    showAttempt = true
+                    wip = offspring
+                else
+                    # the offspring is no better than the parent (and possibly worse)
+                    showAttempt = false
+                generation += 1
+            duration = DateTime.now.subtract(start)
+            print '    duration: [duration]'
+            return duration.totalSeconds
+
+    def runSingleStepSelection(goal as String, alphabet as String) as float
+        require
+            goal.length
+            alphabet.length
+        ensure
+            result > 0
+        body
+            print 'Single Step Selection:'
+            start = DateTime.now
+            maxAttempts = 1_000_000
+            reportInterval = 100_000
+            maxScore = 0
+            for i in maxAttempts
+                s = .randomString(goal.length, alphabet)
+                if s == goal
+                    # this could theoretically happen, but never does
+                    print '    !!! SUCCESS !!!'
+                    print '    On attempt [i+1], a randomly generated string matched:'
+                    print '    [s]'
+                    break
+                if .score(s, goal) > maxScore
+                    maxScore = .score(s, goal)
+                if (i+1) % reportInterval == 0
+                    print '    [i+1]...'
+            if s <> goal
+                print '    Giving up after [i] attempts of single step selection.'
+                print '    Maximum score was [maxScore]%.'
+            duration = DateTime.now.subtract(start)
+            print '    duration: [duration]'
+            return duration.totalSeconds
+
+    def randomString(length as int, alphabet as String) as String
+        require
+            length > 0
+            alphabet <> ''
+        ensure
+            result.length == length
+        test
+            x = BlindWatchMaker1()
+            assert x.randomString(5, 'ab').length == 5
+            s = x.randomString(1000, 'a')
+            for c in s, assert c == c'a'
+        body
+            sb = StringBuilder()
+            for i in length
+                c = alphabet[_random.next(alphabet.length)]
+                sb.append(c)
+            return sb.toString
+
+    def score(candidate as String, goal as String) as int
+        """
+        Returns the score of the candidate string with regards to how closely it
+        matches the goal.
+        """
+        require
+            candidate.length  # Pex
+            goal.length  # Pex
+            candidate.length == goal.length
+        ensure
+            result >= 0 and result <= 100
+        test
+            bwcc = BlindWatchMaker1()
+            assert bwcc.score('aoeu', 'aoeu') == 100
+            assert bwcc.score('aabb', 'aacc') == 50
+            assert bwcc.score('a b ', 'axbx') == 50
+        body
+            score = 0
+            for i in goal.length
+                if candidate[i] == goal[i], score += 1
+            value = (score / goal.length * 100) to int
+            return value
