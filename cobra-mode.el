@@ -1,4 +1,7 @@
-;; Cobra mode
+;;; cobra-mode.el --- Major mode for .net based Cobra language.
+;; Author: Taylor "Nekroze" Lawson
+;; URL: http://github.com/Nekroze/cobra-mode
+;; Version: 1.0.0
 
 ;; Load python-mode if available, otherwise use builtin emacs python package
 (when (not(require 'python-mode nil t))
@@ -29,3 +32,4 @@
 )
 
 (provide 'cobra-mode)
+;;; cobra-mode.el ends here
